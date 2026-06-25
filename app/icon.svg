@@ -1,0 +1,21 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/256/svg">
+  <!-- Background with gradient -->
+  <rect width="256" height="256" rx="60" fill="url(#paint0_linear)"/>
+  
+  <!-- Outer glow/stroke for premium feel -->
+  <rect x="2" y="2" width="252" height="252" rx="58" stroke="white" stroke-opacity="0.1" stroke-width="4"/>
+  
+  <!-- Envelope Icon -->
+  <path d="M58 88C58 76.9543 66.9543 68 78 68H178C189.046 68 198 76.9543 198 88V168C198 179.046 189.046 188 178 188H78C66.9543 188 58 179.046 58 168V88Z" fill="white" fill-opacity="0.1" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Envelope Flap (Top) -->
+  <path d="M58 88L128 140L198 88" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <defs>
+    <!-- Modern Indigo/Purple Gradient matching MailFlow UI -->
+    <linearGradient id="paint0_linear" x1="0" y1="0" x2="256" y2="256" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#818cf8"/>
+      <stop offset="1" stop-color="#4f46e5"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -1,0 +1,103 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String      @id @default(cuid())
+  email        String      @unique
+  name         String?
+  password     String?     // Hashed password for credentials login
+  smtpConfig   SmtpConfig?
+  templates    Template[]
+  campaigns    Campaign[]
+  csvFiles     CsvFile[]
+  createdAt    DateTime    @default(now())
+}
+
+model SmtpConfig {
+  id         String  @id @default(cuid())
+  userId     String  @unique
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  host       String
+  port       Int
+  username   String
+  password   String  // AES-256 encrypted via utils/encryption.ts
+  fromName   String
+  fromEmail  String
+}
+
+model Template {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  subject     String       // Supports {{variables}}
+  body        String       // HTML with {{variable}} tokens
+  variables   String       // Extracted: JSON serialized array ["company_name", "email", ...]
+  attachments Attachment[]
+  campaigns   Campaign[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Attachment {
+  id          String    @id @default(cuid())
+  templateId  String?
+  template    Template? @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  filename    String
+  storagePath String    // local path or S3 key (resolved via storage adapter)
+  mimeType    String
+  sizeBytes   Int
+}
+
+model CsvFile {
+  id            String     @id @default(cuid())
+  userId        String
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  filename      String
+  storagePath   String     // Path/key in local storage or S3 bucket
+  columns       String     // JSON serialized columns list
+  rowCount      Int
+  rowHash       String     // Full-file hash to detect no-change re-uploads
+  processedRows String     // JSON serialized processed rows list
+  campaigns     Campaign[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Campaign {
+  id            String         @id @default(cuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  templateId    String
+  template      Template       @relation(fields: [templateId], references: [id])
+  csvFileId     String
+  csvFile       CsvFile        @relation(fields: [csvFileId], references: [id])
+  columnMapping String       // JSON string: { "template_var": "csv_column_name" }
+  emailColumn   String         // CSV column holding recipient email address
+  status        String         @default("DRAFT")
+  autoSend      Boolean        @default(false)
+  emailLogs     EmailLog[]
+  createdAt     DateTime       @default(now())
+}
+
+model EmailLog {
+  id             String      @id @default(cuid())
+  campaignId     String
+  campaign       Campaign    @relation(fields: [campaignId], references: [id])
+  recipientEmail String
+  rowData        String      // JSON serialized snapshot of CSV row
+  status         String      @default("PENDING")
+  sentAt         DateTime?
+  errorMessage   String?
+  messageId      String?     // SMTP Message-ID for tracking
+  retryCount     Int         @default(0)
+  createdAt      DateTime    @default(now())
+}
+
+

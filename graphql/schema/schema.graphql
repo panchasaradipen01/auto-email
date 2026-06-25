@@ -1,0 +1,189 @@
+scalar JSON
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+enum EmailStatus {
+  PENDING
+  QUEUED
+  SENT
+  FAILED
+  BOUNCED
+}
+
+type User {
+  id: ID!
+  email: String!
+  name: String
+  smtpConfig: SmtpConfig
+  templates: [Template!]!
+  campaigns: [Campaign!]!
+  csvFiles: [CsvFile!]!
+  createdAt: String!
+}
+
+type SmtpConfig {
+  id: ID!
+  host: String!
+  port: Int!
+  username: String!
+  fromName: String!
+  fromEmail: String!
+}
+
+type Template {
+  id: ID!
+  name: String!
+  subject: String!
+  body: String!
+  variables: [String!]!
+  attachments: [Attachment!]!
+  campaigns: [Campaign!]!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Attachment {
+  id: ID!
+  filename: String!
+  storagePath: String!
+  mimeType: String!
+  sizeBytes: Int!
+}
+
+type CsvFile {
+  id: ID!
+  filename: String!
+  storagePath: String!
+  columns: [String!]!
+  rowCount: Int!
+  rowHash: String!
+  processedRows: [String!]!
+  campaigns: [Campaign!]!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Campaign {
+  id: ID!
+  template: Template!
+  csvFile: CsvFile!
+  columnMapping: JSON!
+  emailColumn: String!
+  status: CampaignStatus!
+  autoSend: Boolean!
+  emailLogs: [EmailLog!]!
+  createdAt: String!
+}
+
+type EmailLog {
+  id: ID!
+  campaignId: ID!
+  recipientEmail: String!
+  rowData: JSON!
+  status: EmailStatus!
+  sentAt: String
+  errorMessage: String
+  messageId: String
+  retryCount: Int!
+  createdAt: String!
+}
+
+type CampaignStats {
+  campaignId: ID!
+  total: Int!
+  pending: Int!
+  queued: Int!
+  sent: Int!
+  failed: Int!
+  bounced: Int!
+}
+
+type EmailLogConnection {
+  items: [EmailLog!]!
+  totalCount: Int!
+}
+
+type Query {
+  me: User
+  
+  templates: [Template!]!
+  template(id: ID!): Template
+  
+  campaigns: [Campaign!]!
+  campaign(id: ID!): Campaign
+  
+  csvFiles: [CsvFile!]!
+  csvFile(id: ID!): CsvFile
+  
+  emailLogs(
+    campaignId: ID!
+    offset: Int
+    limit: Int
+    status: EmailStatus
+    sortBy: String
+    sortOrder: String
+  ): EmailLogConnection!
+  
+  campaignStats(campaignId: ID!): CampaignStats!
+}
+
+type Mutation {
+  saveSmtpConfig(
+    host: String!
+    port: Int!
+    username: String!
+    password: String!
+    fromName: String!
+    fromEmail: String!
+  ): SmtpConfig!
+  
+  createTemplate(
+    name: String!
+    subject: String!
+    body: String!
+    attachmentIds: [ID!]
+  ): Template!
+  
+  updateTemplate(
+    id: ID!
+    name: String
+    subject: String
+    body: String
+    attachmentIds: [ID!]
+  ): Template!
+  
+  deleteTemplate(id: ID!): Boolean!
+  
+  createCampaign(
+    templateId: ID!
+    csvFileId: ID!
+    columnMapping: JSON!
+    emailColumn: String!
+    autoSend: Boolean!
+  ): Campaign!
+  
+  updateCampaignStatus(
+    id: ID!
+    status: CampaignStatus!
+  ): Campaign!
+  
+  deleteCampaign(id: ID!): Boolean!
+  
+  triggerCampaign(id: ID!): Boolean!
+  
+  retryCampaign(id: ID!): Boolean!
+  
+  deleteCsvFile(id: ID!): Boolean!
+  
+  createAttachment(
+    filename: String!
+    storagePath: String!
+    mimeType: String!
+    sizeBytes: Int!
+  ): Attachment!
+}

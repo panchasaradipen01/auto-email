@@ -226,4 +226,17 @@ worker.on('failed', (job, err) => {
   captureException(err, { jobId: job?.id, data: job?.data });
 });
 
+// Dummy HTTP server for Render Health Checks
+// Render's Web Service tier requires binding to a PORT to stay alive.
+import http from 'http';
+const port = process.env.PORT || 8080;
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Worker is running and healthy!\\n');
+});
+
+server.listen(port, () => {
+  console.log(`Worker health check server listening on port ${port}`);
+});
+
 export default worker;

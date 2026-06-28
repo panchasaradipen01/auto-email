@@ -13,6 +13,7 @@ export class S3StorageAdapter implements StorageAdapter {
     this.s3Client = new S3Client({
       region: process.env.AWS_REGION || 'us-east-1',
       endpoint: process.env.AWS_ENDPOINT || undefined,
+      forcePathStyle: true, // Required for Supabase, MinIO, and Cloudflare R2
       credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'mock-key',
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'mock-secret',

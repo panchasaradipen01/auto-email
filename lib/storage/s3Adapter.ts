@@ -12,6 +12,7 @@ export class S3StorageAdapter implements StorageAdapter {
     // Instantiates client using environment credentials or default fallback
     this.s3Client = new S3Client({
       region: process.env.AWS_REGION || 'us-east-1',
+      endpoint: process.env.AWS_ENDPOINT || undefined,
       credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'mock-key',
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'mock-secret',
